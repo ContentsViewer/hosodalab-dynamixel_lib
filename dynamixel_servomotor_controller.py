@@ -73,7 +73,7 @@ class DynamixelServomotorController:
         if speed < -1.0: speed = -1.0
         
         speed *= self.velocity_limit()
-        print str(speed)
+        # print str(speed)
 
         dxl_comm_result, dxl_error = \
             self.packet_handler.write4ByteTxRx(self.port_handler, self.current_id, self.motor_config.ADDRESS_GOAL_VELOCITY, int(speed))

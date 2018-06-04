@@ -41,6 +41,9 @@ def main():
 
 
     speed = 0.0
+    dir = 0.2
+    max_speed = 0.5
+
 
 
     sw = False
@@ -50,7 +53,18 @@ def main():
 
         motor_controller.set_led(int(sw))
         
-        motor_controller.set_goal_velocity(0.5)
+        motor_controller.set_goal_velocity(speed)
+        
+        speed += dir
+        if speed > max_speed:
+            speed = max_speed
+            dir *= -1
+
+        if speed < -max_speed:
+            speed = -max_speed
+            dir *= -1
+
+        print str(speed)
 
         timer.sleep()
 
