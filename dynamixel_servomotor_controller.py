@@ -126,6 +126,7 @@ class DynamixelServomotorController:
 
         self.port_handler.closePort()
 
+
     def baudrate(self):
         if not self.initialized: return
 
@@ -144,3 +145,31 @@ class DynamixelServomotorController:
             self.packet_handler.write1ByteTxRx(self.port_handler, self.current_id, self.motor_config.ADDRESS_BAUDRATE, baudrate)
 
         self.error_check(dxl_comm_result, dxl_error)
+        
+    
+    
+
+    def id(self):
+        if not self.initialized: return
+
+        
+        dxl_id, dxl_comm_result, dxl_error = \
+            self.packet_handler.read1ByteTxRx(self.port_handler, self.current_id, self.motor_config.ADDRESS_ID)
+
+        self.error_check(dxl_comm_result, dxl_error)
+
+        return dxl_id
+
+    def set_id(self, id):
+        if not self.initialized: return
+
+        dxl_comm_result, dxl_error = \
+            self.packet_handler.write1ByteTxRx(self.port_handler, self.current_id, self.motor_config.ADDRESS_ID, id)
+
+        self.error_check(dxl_comm_result, dxl_error)
+
+
+        
+
+
+        
