@@ -40,6 +40,7 @@ def main():
 
     motor_controller.set_torque_enable(1)
 
+    print str(motor_controller.present_position())
 
     speed = 0.0
     dir = 0.2
