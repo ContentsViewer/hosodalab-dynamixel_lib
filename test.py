@@ -60,8 +60,8 @@ def main():
 
         motor_controller.set_led(int(sw))
 
-        # motor_controller.set_goal_position(0 if sw else 180)
-        motor_controller.set_goal_position(0.0)
+        motor_controller.set_goal_position(0 if sw else 180)
+        # motor_controller.set_goal_position(0.0)
 
 
         print "present_position: " + str(motor_controller.present_position())
