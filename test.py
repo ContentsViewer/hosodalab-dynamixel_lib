@@ -25,7 +25,7 @@ def main():
     print "start node."
     rospy.init_node("servomotor_controller")
 
-    timer = rospy.Rate(1)
+    timer = rospy.Rate(0.5)
 
 
 
@@ -35,10 +35,12 @@ def main():
     motor_controller.current_id = DXL_ID
 
 
-    motor_controller.set_operating_mode(XLConfig.OPERATING_MODE_VELOCITY_CONTROL_MODE)
+    motor_controller.set_operating_mode(XLConfig.OPERATING_MODE_POSITION_CONTROL_MODE)
+    # motor_controller.set_operating_mode(XLConfig.OPERATING_MODE_VELOCITY_CONTROL_MODE)
+
     motor_controller.set_torque_enable(1)
 
-
+    print str(motor_controller.present_position())
 
     speed = 0.0
     dir = 0.2
@@ -52,9 +54,16 @@ def main():
         sw ^= True
 
         motor_controller.set_led(int(sw))
+
+        # motor_controller.set_goal_position(0 if sw else 180)
+        motor_controller.set_goal_position(0.0)
+
+        print "loop"
         
-        motor_controller.set_goal_velocity(speed)
-        
+        # motor_controller.set_goal_velocity(speed)
+        # print "max_position: " +  str(motor_controller.max_position_limit())
+        # print "min_position: " +  str(motor_controller.min_position_limit())
+
         speed += dir
         if speed > max_speed:
             speed = max_speed

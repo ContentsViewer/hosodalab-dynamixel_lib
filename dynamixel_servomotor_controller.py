@@ -38,9 +38,18 @@ class DynamixelServomotorController:
         print "Initialized success!!"
 
         
+    def end(self):
+        if not self.initialized: return
+
+        self.port_handler.closePort()
 
 
 
+
+
+    #
+    # @param mode:
+    #  
     def set_operating_mode(self, mode):
         if not self.initialized: return
 
@@ -52,7 +61,8 @@ class DynamixelServomotorController:
 
 
 
-
+    # 
+    # 
     def velocity_limit(self):
         if not self.initialized: return
 
@@ -64,8 +74,10 @@ class DynamixelServomotorController:
         return dxl_velocity_limit
 
 
+    # 
     # @param speed:
-    #  
+    #  set speed from -1 to 1
+    #  -1, 1 is max velocity
     def set_goal_velocity(self, speed):
         if not self.initialized: return
         
@@ -81,7 +93,10 @@ class DynamixelServomotorController:
         self.error_check(dxl_comm_result, dxl_error)
 
 
-
+    #
+    # @param enable:
+    #  set 0 or 1
+    #
     def set_torque_enable(self, enable):
         if not self.initialized: return
 
@@ -91,7 +106,10 @@ class DynamixelServomotorController:
         self.error_check(dxl_comm_result, dxl_error)
 
 
-    
+    #
+    # @param sw:
+    #  set 0 or 1. 0 is turning off led, and vice versa.
+    #
     def set_led(self, sw):
         if not self.initialized: return
 
@@ -103,6 +121,62 @@ class DynamixelServomotorController:
         self.error_check(dxl_comm_result, dxl_error)
 
 
+
+    def max_position_limit(self):
+        if not self.initialized: return
+
+        dxl_max_position_limit, dxl_comm_result, dxl_error = \
+            self.packet_handler.read4ByteTxRx(self.port_handler,  self.current_id, self.motor_config.ADDRESS_MAX_POSITION_LIMIT)
+
+        self.error_check(dxl_comm_result, dxl_error)
+
+        return dxl_max_position_limit * 360.0 / self.motor_config.MAXIMUM_POSITION_VALUE
+
+
+
+    def min_position_limit(self):
+        if not self.initialized: return
+
+        dxl_min_position_limit, dxl_comm_result, dxl_error = \
+            self.packet_handler.read4ByteTxRx(self.port_handler,  self.current_id, self.motor_config.ADDRESS_MIN_POSITION_LIMIT)
+
+        self.error_check(dxl_comm_result, dxl_error)
+
+        return dxl_min_position_limit * 360.0 / self.motor_config.MAXIMUM_POSITION_VALUE
+
+
+
+    def set_goal_position(self, degree):
+        if not self.initialized: return
+        
+        position_value = degree / 360.0 * self.motor_config.MAXIMUM_POSITION_VALUE 
+
+        
+        #print str(position_value)
+
+        dxl_comm_result, dxl_error = \
+            self.packet_handler.write4ByteTxRx(self.port_handler, self.current_id, self.motor_config.ADDRESS_GOAL_POSITION, int(position_value))
+
+        self.error_check(dxl_comm_result, dxl_error)
+
+
+
+    def present_position(self):
+        if not self.initialized: return
+
+        dxl_present_position, dxl_comm_result, dxl_error = \
+            self.packet_handler.read4ByteTxRx(self.port_handler,  self.current_id, self.motor_config.ADDRESS_PRESENT_POSITION)
+
+        self.error_check(dxl_comm_result, dxl_error)
+
+        return dxl_present_position
+
+
+
+
+
+
+    
 
     def error_check(self, dxl_comm_result, dxl_error):
         is_ok = True
@@ -121,6 +195,7 @@ class DynamixelServomotorController:
 
         return is_ok
         
+
     def end(self):
         if not self.initialized: return
 
@@ -171,5 +246,3 @@ class DynamixelServomotorController:
 
         
 
-
-        
