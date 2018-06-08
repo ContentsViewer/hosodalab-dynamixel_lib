@@ -1,5 +1,6 @@
 
 class XLConfig:
+    ADDRESS_LED            = 7
     ADDRESS_OPERATING_MODE = 11
     ADDRESS_VELOCITY_LIMIT = 44
     ADDRESS_TORQUE_ENABLE  = 64
