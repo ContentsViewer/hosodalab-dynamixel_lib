@@ -106,6 +106,23 @@ class DynamixelServomotorController:
         self.error_check(dxl_comm_result, dxl_error)
 
 
+
+
+    def torque_enable(self):
+        if not self.initialized: return
+
+        dxl_torque_enable, dxl_comm_result, dxl_error = \
+            self.packet_handler.read1ByteTxRx(self.port_handler, self.current_id, self.motor_config.ADDRESS_TORQUE_ENABLE)
+
+        self.error_check(dxl_comm_result, dxl_error)
+
+
+        return dxl_torque_enable
+
+
+
+
+
     #
     # @param sw:
     #  set 0 or 1. 0 is turning off led, and vice versa.
@@ -152,7 +169,8 @@ class DynamixelServomotorController:
         position_value = degree / 360.0 * self.motor_config.MAXIMUM_POSITION_VALUE 
 
         
-        #print str(position_value)
+        print "position_value; " +  str(int(position_value))
+        
 
         dxl_comm_result, dxl_error = \
             self.packet_handler.write4ByteTxRx(self.port_handler, self.current_id, self.motor_config.ADDRESS_GOAL_POSITION, int(position_value))
@@ -169,7 +187,7 @@ class DynamixelServomotorController:
 
         self.error_check(dxl_comm_result, dxl_error)
 
-        return dxl_present_position
+        return dxl_present_position * 360.0 / self.motor_config.MAXIMUM_POSITION_VALUE
 
 
 
@@ -211,6 +229,8 @@ class DynamixelServomotorController:
         self.error_check(dxl_comm_result, dxl_error)
 
         return dxl_baudrate
+
+
 
     def set_baudrate(self, baudrate):
         if not self.initialized: return

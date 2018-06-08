@@ -18,5 +18,8 @@ class XLConfig:
     OPERATING_MODE_POSITION_CONTROL_MODE = 3
 
 
+    
+
+
     MAXIMUM_POSITION_VALUE          = 4096
 

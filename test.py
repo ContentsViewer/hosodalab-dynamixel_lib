@@ -38,9 +38,14 @@ def main():
     motor_controller.set_operating_mode(XLConfig.OPERATING_MODE_POSITION_CONTROL_MODE)
     # motor_controller.set_operating_mode(XLConfig.OPERATING_MODE_VELOCITY_CONTROL_MODE)
 
+    print "torque_enable: "
     motor_controller.set_torque_enable(1)
 
-    print str(motor_controller.present_position())
+    print "id: " + str(motor_controller.id())
+    print "baudrate: " + str(motor_controller.baudrate())
+    print "torque_enable: " + str(motor_controller.torque_enable())
+    
+
 
     speed = 0.0
     dir = 0.2
@@ -57,6 +62,13 @@ def main():
 
         # motor_controller.set_goal_position(0 if sw else 180)
         motor_controller.set_goal_position(0.0)
+
+
+        print "present_position: " + str(motor_controller.present_position())
+
+
+
+
 
         print "loop"
         
