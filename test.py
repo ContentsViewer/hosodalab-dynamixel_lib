@@ -2,6 +2,8 @@
 
 # import os
 
+import traceback
+
 import rospy
 
 from dynamixel_servomotor_controller import *
@@ -9,8 +11,14 @@ from xl_config import *
 from getch import Getch
 
 
+import socket
+import time
+
+
 #from time import sleep
 
+PORT = 8001
+CONNECTION_LOST_TIMEOUT = 5.0
 
 PROTOCOL_VERSION = 2.0
 
@@ -20,10 +28,24 @@ BAUDRATE = 57600
 DEVICENAME = '/dev/ttyUSB0'
 
 def main():
-    print "start node."
+    print "Start node."
+
+
+    # --- ros setting -----------
     rospy.init_node("servomotor_controller")
 
     timer = rospy.Rate(0.5)
+    # end ros setting -------
+
+
+    # --- socket settgin --------
+    server_socket = socket.socket()
+    server_socket.bind(('', PORT))
+    print 'Launch tcp socket.'
+    # end socket setting ------
+
+
+
 
 
 
@@ -43,52 +65,99 @@ def main():
     print "baudrate: " + str(motor_controller.baudrate())
     print "torque_enable: " + str(motor_controller.torque_enable())
     
-
-
-    # speed = 0.0
-    # dir = 0.2
-    # max_speed = 0.5
-
+    
+    
 
 
     # sw = False
 
-    # getch = Getch()
+    is_connected = False
+    client_socket = None
 
+    last_request_time = time.time()
+
+    # --- node main loop -----------------------------
     while not rospy.is_shutdown():
         # sw ^= True
 
         # motor_controller.set_led(int(sw))
+        
+        try:
+            if is_connected:
+                # check last request time.
+                if time.time() - last_request_time > CONNECTION_LOST_TIMEOUT:
+                    print ("[ERROR] long no request. last_request_time: %f; now: %f" % (last_request_time, time.time()))
+                    raise Exception
 
-        # motor_controller.set_goal_position(0 if sw else 180)
-        # motor_controller.set_goal_position(0.0)
+
+                request_msg = client_socket.recv(1024)
+
+                # --- something to receive ----------------
+                if request_msg != "":
+
+                    # lines = request_msg.split("\n")
+                    # for line in lines:
+                        
+                    if request_msg == "ping":
+                        client_socket.send("pong")
+
+                    elif request_msg.startswith("speed"):
+                        args = request_msg.split(" ")
+                        try:
+                            speed = float(args[1])
+                            print "speed: " + str(speed)
+                            motor_controller.set_goal_velocity(speed)
+
+                        except:
+                            print "[ERROR] cannot set the motor speed"
+                            traceback.print_exc()
+                        finally:
+                            client_socket.send("ACK")
+
+                    last_request_time = time.time()
+                # end something receive --------------------
 
 
-        #print "present_position: " + str(motor_controller.present_position())
+            else:
+                print "Waiting for connection..."
+                server_socket.listen(10)
+                client_socket, client_address = server_socket.accept()
+                print "connected!"
+                is_connected = True
+                last_request_time = time.time()
 
-        # print getch()
-        # continue
+        except Exception as e:
+            print("[ERROR] message:{0}".format(e.message))
+            traceback.print_exc()
+            print "[ERROR] connection lost. retrying..."
+            is_connected = False
+            motor_controller.set_goal_velocity(0.0)
+            if client_socket is not None:
+                client_socket.close()
+                client_socket = None
 
-        print "cmd << ",
-        cmd = raw_input()
 
-        isAccepted = True
-        if(cmd == "exit"):
-            print "program is now to end..."
-            break
-        else: 
-            try:
-                speed = float(cmd)
-                print "speed: " + str(speed)
-                # motor_controller.set_goal_velocity(speed)
-            except:
-                isAccepted = False
+
+        # print "cmd << ",
+        # cmd = raw_input()
+
+        # isAccepted = True
+        # if(cmd == "exit"):
+        #     print "program is now to end..."
+        #     break
+        # else: 
+        #     try:
+        #         speed = float(cmd)
+        #         print "speed: " + str(speed)
+        #         motor_controller.set_goal_velocity(speed)
+        #     except:
+        #         isAccepted = False
         
         
-        if not isAccepted:
-            print "[Error] command parse error!"
+        # if not isAccepted:
+        #     print "[Error] command parse error!"
 
-        print "OK"
+        # print "OK"
 
         # print "loop"
         
@@ -108,10 +177,13 @@ def main():
         # print str(speed)
 
         timer.sleep()
+    # end node main loop --------------------
 
     motor_controller.set_led(0)
     motor_controller.set_goal_velocity(0.0)
     motor_controller.end()
+    
+    server_socket.close()
 
     
 if __name__ == "__main__":
