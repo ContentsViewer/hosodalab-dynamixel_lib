@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# import os
+import os
 
 import traceback
 
@@ -32,7 +32,7 @@ def main():
 
 
     # --- ros setting -----------
-    rospy.init_node("servomotor_controller")
+    rospy.init_node("robot_controller")
 
     timer = rospy.Rate(0.5)
     # end ros setting -------
@@ -99,7 +99,7 @@ def main():
                     # for line in lines:
                         
                     if request_msg == "ping":
-                        client_socket.send("pong")
+                        client_socket.send("pong\n")
 
                     elif request_msg.startswith("speed"):
                         args = request_msg.split(" ")
@@ -112,7 +112,18 @@ def main():
                             print "[ERROR] cannot set the motor speed"
                             traceback.print_exc()
                         finally:
-                            client_socket.send("ACK")
+                            client_socket.send("ACK\n")
+                    
+                    elif request_msg.startswith("shutdown"):
+                        print "shutdown received"
+                        os.system("sudo shutdown now")
+                        client_socket.send("ACK\n")
+
+                    elif request_msg.startswith("reboot"):
+                        print "reboot received"
+                        os.system("sudo reboot")
+                        client_socket.send("ACK\n")
+                        
 
                     last_request_time = time.time()
                 # end something receive --------------------

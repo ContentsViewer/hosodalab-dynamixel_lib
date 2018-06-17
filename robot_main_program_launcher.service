@@ -1,0 +1,14 @@
+[Unit]
+Description=RobotMainProgramLauncher
+After=syslog.target
+
+[Service]
+User=pi
+Type=simple
+WorkingDirectory=/home/pi
+ExecStart=/home/pi/catkin_ws/src/my_dynamixel_workbench_tutorial/src/robot_main_program_launcher.sh
+TimeoutStopSec=5
+StandardOutput=null
+
+[Install]
+WantedBy = multi-user.target
