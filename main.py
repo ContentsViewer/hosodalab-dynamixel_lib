@@ -34,7 +34,7 @@ def main():
     # --- ros setting -----------
     rospy.init_node("robot_controller")
 
-    timer = rospy.Rate(0.5)
+    timer = rospy.Rate(10)
     # end ros setting -------
 
 
@@ -116,13 +116,23 @@ def main():
                     
                     elif request_msg.startswith("shutdown"):
                         print "shutdown received"
-                        os.system("sudo shutdown now")
-                        client_socket.send("ACK\n")
+                        try:
+                            os.system("sudo shutdown now")
+                        except:
+                            print "[ERROR] cannot shutdown"
+                            traceback.print_exc()
+                        finally:
+                            client_socket.send("ACK\n")
 
                     elif request_msg.startswith("reboot"):
                         print "reboot received"
-                        os.system("sudo reboot")
-                        client_socket.send("ACK\n")
+                        try:
+                            os.system("sudo reboot")
+                        except:
+                            print "[ERROR] cannot reboot"
+                            traceback.print_exc()
+                        finally:
+                            client_socket.send("ACK\n")
                         
 
                     last_request_time = time.time()
@@ -131,7 +141,8 @@ def main():
 
             else:
                 print "Waiting for connection..."
-                server_socket.listen(10)
+                # wait one connection
+                server_socket.listen(1)
                 client_socket, client_address = server_socket.accept()
                 print "connected!"
                 is_connected = True
